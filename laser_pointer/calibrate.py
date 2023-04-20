@@ -1,5 +1,6 @@
 import numpy as np
 import cv2 as cv
+import time
 
 
 class Calibrate:
@@ -7,6 +8,7 @@ class Calibrate:
 
     CALIBRATE_WHITE_PATH = r"imagens\calibrate_white.png"
     CALIBRATE_BLACK_PATH = r"imagens\calibrate_black.png"
+    CALIBRATE_GRAY_PATH = r"imagens\calibrate_gray.png"
 
     def __init__(self, cam, matCam, distorCam):
         self.cam = cam
@@ -25,19 +27,33 @@ class Calibrate:
         """
 
         diff = cv.absdiff(blackImg, whiteImg)
-        threshold, thresh = cv.threshold(diff, 50, 255, cv.THRESH_BINARY)
-        cv.imwrite("./screenshots/calibrate_thresh.png", thresh)
+        cv.imwrite("diff.png", diff)
 
+        gray = cv.cvtColor(diff, cv.COLOR_BGR2GRAY)
+        cv.imwrite("gray.png", gray)
+
+        threshold, thresh = cv.threshold(
+            gray, 50, 255, cv.THRESH_BINARY + cv.THRESH_OTSU
+        )
+        cv.imwrite("thresh.png", thresh)
+
+        # cv.imwrite("./screenshots/calibrate_thresh.png", thresh)
+        # cv.imshow("thresh", thresh)
         # Achar contornos
         contours, hier = cv.findContours(
             thresh, cv.RETR_LIST, cv.CHAIN_APPROX_NONE
         )
 
         # Calcular maior contorno
+
         try:
             cnt = contours[0]
             for cont in contours:
-                if cv.contourArea(cont) > cv.contourArea(cnt):
+                epsilon = 0.01 * cv.arcLength(cont, True)
+                approx = cv.approxPolyDP(cont, epsilon, True)
+                if (cv.contourArea(cont) > cv.contourArea(cnt)) and (
+                    len(approx) == 4
+                ):
                     cnt = cont
 
             # Aproximar maior contorno por um polígono
@@ -51,11 +67,12 @@ class Calibrate:
                 mask_draw, [approx], -1, (0, 0, 255), 3
             )
             print(f"Número de pontos do polígono: {len(approx)}")
-        except:
+            return approx, cnt, contours_generated
+        except Exception as e:
+            raise e
             pass
-        return approx, cnt, contours_generated
 
-    def find_coordinates(approx):
+    def find_coordinates(self, approx):
         points = []
         for coord in approx:
             points.append(coord[0])
@@ -87,41 +104,25 @@ class Calibrate:
             numpy.ndarray: image
         """
 
+        self.show_image(path)
+        time.sleep(2)
+
         status, frame = cap.read()
-        imgName = path.split("/")[-1]
 
-        frame_count = 0
-        frames_sum = []
-
-        while cap.isOpened() and not status:
+        aux = 0
+        while cap.isOpened() and aux < 30:
             status, frame = cap.read()
-
-            self.show_image(path)
-
-            if 20 <= frame_count < 30:
-                # Somar frames
-                frames_sum.append(frame)
-                frame_count += 1
-                # print(frame_count)
-            elif frame_count < 20:
-                frame_count += 1
-            else:
-                # Calculate blended image
-                img_mean = frames_sum[0]
-                for i in range(len(frames_sum)):
-                    if i == 0:
-                        pass
-                    else:
-                        alpha = 1.0 / (i + 1)
-                        beta = 1.0 - alpha
-                        img_mean = cv.addWeighted(
-                            frames_sum[i], alpha, img_mean, beta, 0.0
-                        )
-                        if imgName == "calibrate_black.png":
-                            img_mean = cv.add(img_mean, -10)
+            aux += 1
 
         # Calibrar imagem
-        img_mean = self.correct_distortion(img_mean)
+        img_mean = self.correct_distortion(frame)
+
+        cv.destroyAllWindows()
+
+        if path == self.CALIBRATE_WHITE_PATH:
+            cv.imwrite("img_mean_white.png", img_mean)
+        elif path == self.CALIBRATE_BLACK_PATH:
+            cv.imwrite("img_black_mean.png", img_mean)
 
         return img_mean
 
@@ -149,7 +150,7 @@ class Calibrate:
         )
         image = cv.imread(path)
         cv.imshow("calibration", image)
-        cv.waitKey(1000)
+        cv.waitKey(100)
 
     def correct_distortion(self, image):
         """Corrects the distortion of the camera lens in the image
@@ -178,11 +179,12 @@ class Calibrate:
     def run(self):
         """Runs the calibration process"""
 
-        video_cap = cv.VideoCapture(0)
+        video_cap = cv.VideoCapture(self.cam, cv.CAP_DSHOW)
 
         whiteImg = self.get_calibration_image(
             video_cap, self.CALIBRATE_WHITE_PATH
         )
+        time.sleep(2)
         blackImg = self.get_calibration_image(
             video_cap, self.CALIBRATE_BLACK_PATH
         )
@@ -191,6 +193,24 @@ class Calibrate:
 
         old_points = self.find_coordinates(approx)
 
+        print(old_points)
+
         M = self.calculate_transformation_matrix(old_points)
 
+        cv.imshow("projetor", countours_generated)
+        cv.waitKey(0)
+
         return M
+
+
+if __name__ == "__main__":
+    matCam = np.load(
+        r"D:\Jupyther\UFSC\Visao Computacional\PowerLaserPointer\laser_pointer\TrabalhomatCam.npy"
+    )
+    distorCam = np.load(
+        r"D:\Jupyther\UFSC\Visao Computacional\PowerLaserPointer\laser_pointer\TrabalhodistorCam.npy"
+    )
+
+    calibrate = Calibrate(1, matCam, distorCam)
+
+    M = calibrate.run()
