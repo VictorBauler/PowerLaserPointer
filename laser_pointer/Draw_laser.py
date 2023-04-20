@@ -8,10 +8,10 @@ import cv2
 # As matrizes matCam e distorCam são lidas de arquivo
 # Definir caminho dos arquivos:
 # Defina o Caminho para a pasta onde estão os arquivos matCam e distorCam
-Caminho = r"C:\Users\giord\OneDrive\Documentos\Aula\Visao_Comp\Trabalho"
+# Caminho = r"C:\Users\giord\OneDrive\Documentos\Aula\Visao_Comp\Trabalho"
 # Lendo arquivos das matrizes da câmera e dos coeficientes que corrigem as distorções da lente:
-matCam = np.load(rf"{Caminho}\TrabalhomatCam.npy")
-distorCam = np.load(rf"{Caminho}\TrabalhodistorCam.npy")
+# matCam = np.load(rf"{Caminho}\TrabalhomatCam.npy")
+# distorCam = np.load(rf"{Caminho}\TrabalhodistorCam.npy")
 
 # Create the colors to be called when applied the button's function
 red = (0, 0, 255)
@@ -25,7 +25,10 @@ black = (0, 0, 0)
 
 
 def draw_laser(image, color, old_points):
-    image[old_points[0][1]:old_points[3][1], old_points[0][0]:old_points[3][0]]
+    image = image[
+        int(old_points[0][1]) : int(old_points[3][1]),
+        int(old_points[0][0]) : int(old_points[3][0]),
+    ]
     # first, tranforms the image to HSV
     cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     # create the mask for saturated color: a mask is the same size as our image, but has only two pixel values: 0 and 255
@@ -50,29 +53,29 @@ def draw_laser(image, color, old_points):
 
 # Inicializa a câmera indicando o numero do dispositivo de captura da imagem
 # (geralmente 0 funciona quando só ha uma câmera em uso. Use 1 para uma segunda câmera etc)
-cam = cv2.VideoCapture(0)
+# cam = cv2.VideoCapture(0)
 
-# Para mostrar uma imagem ao vivo, adquira sequencialmente várias imagens
-# Para isso, inicie um loop sem fim até que a tecla Esc (codigo 27) seja pressionada
-k = 0
-contagem = 1
-while 1:
-    # Adquira uma imagem
-    Sucesso, img = cam.read()
-    # A variável Sucesso conterá True se a aquisição for bem-sucedida
-    if Sucesso == True:
-        # Desenha o laser na imagem e retorna a imagem desenhada
-        # A imagem passada pra função draw_laser deve ser apenas a imagem do projetor
-        # A cor passada pra função draw_laser deve ser definida conforme a função do botão selecionado
-        cv2.imshow("imagem", draw_laser(img, red))
-        # Espere por 10 ms que o usuário pressione uma tecla
-        k = cv2.waitKey(10)
-        # Se o Esc for pressionado (codigo 27) interrompa o loop
-    if k == 27:
-        break
+# # Para mostrar uma imagem ao vivo, adquira sequencialmente várias imagens
+# # Para isso, inicie um loop sem fim até que a tecla Esc (codigo 27) seja pressionada
+# k = 0
+# contagem = 1
+# while 1:
+#     # Adquira uma imagem
+#     Sucesso, img = cam.read()
+#     # A variável Sucesso conterá True se a aquisição for bem-sucedida
+#     if Sucesso == True:
+#         # Desenha o laser na imagem e retorna a imagem desenhada
+#         # A imagem passada pra função draw_laser deve ser apenas a imagem do projetor
+#         # A cor passada pra função draw_laser deve ser definida conforme a função do botão selecionado
+#         cv2.imshow("imagem", draw_laser(img, red))
+#         # Espere por 10 ms que o usuário pressione uma tecla
+#         k = cv2.waitKey(10)
+#         # Se o Esc for pressionado (codigo 27) interrompa o loop
+#     if k == 27:
+#         break
 
-k = cv2.waitKey(-1)
-cv2.destroyAllWindows()
+# k = cv2.waitKey(-1)
+# cv2.destroyAllWindows()
 
-# É uma boa pratica desalocar a camera antes de encerrar o programa
-cam.release()
+# # É uma boa pratica desalocar a camera antes de encerrar o programa
+# cam.release()

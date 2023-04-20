@@ -194,13 +194,13 @@ class Calibrate:
         old_points = self.find_coordinates(approx)
 
         print(old_points)
-
+        print(old_points[0][1])
         M = self.calculate_transformation_matrix(old_points)
 
         cv.imshow("projetor", countours_generated)
         cv.waitKey(0)
 
-        return M
+        return M, old_points
 
 
 if __name__ == "__main__":
