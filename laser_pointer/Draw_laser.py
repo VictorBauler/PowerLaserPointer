@@ -10,8 +10,8 @@ import cv2
 # Defina o Caminho para a pasta onde estão os arquivos matCam e distorCam
 Caminho = r"C:\Users\giord\OneDrive\Documentos\Aula\Visao_Comp\Trabalho"
 # Lendo arquivos das matrizes da câmera e dos coeficientes que corrigem as distorções da lente:
-matCam = np.load(fr"{Caminho}\TrabalhomatCam.npy")
-distorCam = np.load(fr"{Caminho}\TrabalhodistorCam.npy")
+matCam = np.load(rf"{Caminho}\TrabalhomatCam.npy")
+distorCam = np.load(rf"{Caminho}\TrabalhodistorCam.npy")
 
 # Create the colors to be called when applied the button's function
 red = (0, 0, 255)
@@ -44,7 +44,7 @@ def draw_laser(image, color):
     else:
         imagem = image
 
-    return (imagem)
+    return imagem
 
 
 # Inicializa a câmera indicando o numero do dispositivo de captura da imagem
@@ -59,7 +59,7 @@ while 1:
     # Adquira uma imagem
     Sucesso, img = cam.read()
     # A variável Sucesso conterá True se a aquisição for bem-sucedida
-    if (Sucesso == True):
+    if Sucesso == True:
         # Desenha o laser na imagem e retorna a imagem desenhada
         # A imagem passada pra função draw_laser deve ser apenas a imagem do projetor
         # A cor passada pra função draw_laser deve ser definida conforme a função do botão selecionado
