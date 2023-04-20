@@ -24,7 +24,8 @@ black = (0, 0, 0)
 # color: color to be drawn based on the buttons
 
 
-def draw_laser(image, color):
+def draw_laser(image, color, old_points):
+    image[old_points[0][1]:old_points[3][1], old_points[0][0]:old_points[3][0]]
     # first, tranforms the image to HSV
     cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     # create the mask for saturated color: a mask is the same size as our image, but has only two pixel values: 0 and 255
