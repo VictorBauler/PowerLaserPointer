@@ -11,15 +11,16 @@ def mouse_callback(event, x, y, flags, param):
     
     # If left mouse button is clicked, set color to corresponding button
     if event == cv2.EVENT_LBUTTONDOWN:
-        if 10 <= x <= 90 and 650 <= y <= 690:
+        if x_r1 <= x <= x_r2 and y_r1 <= y <= y_r2:
             color = (0, 0, 255) # Red button selected
-        elif 110 <= x <= 190 and 650 <= y <= 690:
+        elif x_b1 <= x <= x_b2 and y_b1 <= y <= y_b2:
             color = (255, 0, 0) # Blue button selected
-        elif 210 <= x <= 290 and 650 <= y <= 690:
+        elif x_g1 <= x <= x_g2 and y_g1 <= y <= y_g2:
             color = (0, 255, 0) # Green button selected
-        elif 310 <= x <= 390 and 650 <= y <= 690:
-            saved_img = img.copy() # Save current image
-        elif 410 <= x <= 490 and 650 <= y <= 690:
+        elif x_res1 <= x <= x_res2 and y_res1 <= y <= y_res2:
+            panel = np.zeros((720, 1280, 3), np.uint8) # Clear panel
+        elif x_sav1 <= x <= x_sav2 and y_sav1 <= y <= y_sav2:
+            saved_img = img.copy() # save current image
             cv2.imwrite("saved_image.jpg", img) # Save image to directory
 
 # Create a blank panel for writing
