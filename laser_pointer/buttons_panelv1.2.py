@@ -7,24 +7,20 @@ saved_img = None
 
 
 # Define a function to handle mouse events
-def mouse_callback(
-    event, x, y, flags, param
-):  # substituir por função do laser
+def mouse_callback(x, y):  # substituir por função do laser
     global color, saved_img
 
-    # If left mouse button is clicked, set color to corresponding button
-    if event == cv2.EVENT_LBUTTONDOWN:
-        if x_r1 <= x <= x_r2 and y_r1 <= y <= y_r2:
-            color = (0, 0, 255)  # Red button selected
-        elif x_b1 <= x <= x_b2 and y_b1 <= y <= y_b2:
-            color = (255, 0, 0)  # Blue button selected
-        elif x_g1 <= x <= x_g2 and y_g1 <= y <= y_g2:
-            color = (0, 255, 0)  # Green button selected
-        elif x_res1 <= x <= x_res2 and y_res1 <= y <= y_res2:
-            panel = np.zeros((x_panel, y_panel, 3), np.uint8)  # Clear panel
-        elif x_sav1 <= x <= x_sav2 and y_sav1 <= y <= y_sav2:
-            saved_img = img.copy()  # save current image
-            cv2.imwrite("saved_image.jpg", img)  # Save image to directory
+    if x_r1 <= x <= x_r2 and y_r1 <= y <= y_r2:
+        color = (0, 0, 255)  # Red button selected
+    elif x_b1 <= x <= x_b2 and y_b1 <= y <= y_b2:
+        color = (255, 0, 0)  # Blue button selected
+    elif x_g1 <= x <= x_g2 and y_g1 <= y <= y_g2:
+        color = (0, 255, 0)  # Green button selected
+    elif x_res1 <= x <= x_res2 and y_res1 <= y <= y_res2:
+        panel = np.zeros((x_panel, y_panel, 3), np.uint8)  # Clear panel
+    elif x_sav1 <= x <= x_sav2 and y_sav1 <= y <= y_sav2:
+        saved_img = img.copy()  # save current image
+        cv2.imwrite("saved_image.jpg", saved_img)  # Save image to directory
 
 
 # Function for creation of the Panel
