@@ -129,9 +129,9 @@ class Calibrate:
     def calculate_transformation_matrix(self, old_points):
         """Calculates the transformation matrix"""
 
-        image = cv.imread(self.CALIBRATE_WHITE_PATH)
-
-        comprimento, altura = image.shape[1], image.shape[0]
+        # image = cv.imread(self.CALIBRATE_WHITE_PATH)
+        # comprimento, altura = image.shape[1], image.shape[0]
+        comprimento, altura = 1024, 768
 
         new_points = np.float32(
             [[0, 0], [comprimento, 0], [0, altura], [comprimento, altura]]
@@ -200,6 +200,8 @@ class Calibrate:
         cv.imshow("projetor", countours_generated)
         cv.waitKey(0)
 
+        video_cap.release()
+
         return M, old_points
 
 
@@ -214,3 +216,9 @@ if __name__ == "__main__":
     calibrate = Calibrate(1, matCam, distorCam)
 
     M = calibrate.run()
+
+    (
+        "sahuashudasuhshudashdaduasduasdhuadw",
+        "sauhsausahsusahusauhdasuhdashdasuhasasdas",
+        "sahusahusahuashusauashusahsauh",
+    )

@@ -3,7 +3,8 @@ import numpy as np
 import cv2
 from calibrate import Calibrate
 
-def visualize_camera ():
+
+def visualize_camera():
     cam = cv2.VideoCapture(1, cv2.CAP_DSHOW)
 
     # Para mostrar uma imagem ao vivo, adquira sequencialmente várias imagens
@@ -25,11 +26,7 @@ def visualize_camera ():
     cam.release()
 
 
-
-
-
-
-def aquire_image (camera):
+def aquire_image(camera, calibration):
     # Inicializa a câmera indicando o numero do dispositivo de captura da imagem
     # (geralmente 0 funciona quando só ha uma câmera em uso. Use 1 para uma segunda câmera etc)
     cam = cv2.VideoCapture(camera, cv2.CAP_DSHOW)
@@ -40,13 +37,13 @@ def aquire_image (camera):
     while 1:
         # Adquira uma imagem
         Sucesso, img = cam.read()
-        imgCorrigida = Calibrate.correct_distortion(img)
+        imgCorrigida = calibration.correct_distortion(img)
 
         # A variável Sucesso conterá True se a aquisição for bem-sucedida
-        if (Sucesso == True):
+        if Sucesso == True:
             # Espere por 10 ms que o usuário pressione uma tecla
             k = cv2.waitKey(10)
-            return (imgCorrigida)
+            return imgCorrigida
         # Se o Esc for pressionado (codigo 27) interrompa o loop
         if k == 27:
             break
@@ -55,27 +52,32 @@ def aquire_image (camera):
     cv2.destroyAllWindows()
     # É uma boa pratica desalocar a camera antes de encerrar o programa
     cam.release()
-    
-    
-
-
 
 
 # Create a blank panel for writing (16:9)
-y_panel = 675  # 720
-x_panel = 1200  # 1280
+y_panel = 768  # 720
+x_panel = 1024  # 1280
 
 # Define the buttons position
-x_r1, y_r1 = 395
-x_r2, y_r2 = 525
-x_b1, y_b1 = 535
-x_b2, y_b2 = 665
-x_g1, y_g1 = 675
-x_g2, y_g2 = 805
-x_res1, y_res1 = 10
-x_res2, y_res2 = 160
+# definição do y dos botões
+y_button1 = round(
+    y_panel - (0.1 * y_panel * 0.2)
+)  # 20% do menu de ferramentas espaço em branco abaixo dos botões
+y_button2 = round(
+    y_panel - (0.1 * y_panel * 0.82)
+)  # 62% é o tamanho do botão abaixo do espaçamento
+# definição do x dos botões
+x_r1, y_r1 = 395, 600  # round(y_button1)
+x_r2, y_r2 = 525, 600  # round(y_button2)
+x_b1, y_b1 = 535, 600  # round(y_button1)
+x_b2, y_b2 = 665, 600  # round(y_button2)
+x_g1, y_g1 = 675, 600  # round(y_button1)
+x_g2, y_g2 = 805, 600  # round(y_button2)
+x_res1, y_res1 = 10, round(y_button1)
+x_res2, y_res2 = 160, round(y_button2)
 x_sav1, y_sav1 = 1000, 620
 x_sav2, y_sav2 = 1150, 660
+
 
 # Function for creation of the Panel
 def panel_creation():
@@ -91,14 +93,6 @@ def panel_creation():
 
     # Draw color selection buttons on panel
 
-    # definição do y dos botões
-    y_button1 = round(
-        y_panel - (0.1 * y_panel * 0.2)
-    )  # 20% do menu de ferramentas espaço em branco abaixo dos botões
-    y_button2 = round(
-        y_panel - (0.1 * y_panel * 0.82)
-    )  # 62% é o tamanho do botão abaixo do espaçamento
-    # definição do x dos botões
     x_r1, y_r1, round(y_button1)
     x_r2, y_r2, round(y_button2)
     x_b1, y_b1, round(y_button1)
@@ -108,13 +102,13 @@ def panel_creation():
 
     # Criação dos botões
     cv2.rectangle(
-        panel, (x_r1, y_r1), (x_r2, y_r2), (0, 0, 255), -1
+        panel, (x_r1, y_r1), (x_r2, y_r2), (0, 0, 15), -1
     )  # Red button  / (top left corner) (bottom right corner)
     cv2.rectangle(
-        panel, (x_b1, y_b1), (x_b2, y_b2), (255, 0, 0), -1
+        panel, (x_b1, y_b1), (x_b2, y_b2), (0, 15, 0), -1
     )  # Blue button
     cv2.rectangle(
-        panel, (x_g1, y_g1), (x_g2, y_g2), (0, 80, 0), -1
+        panel, (x_g1, y_g1), (x_g2, y_g2), (15, 0, 0), -1
     )  # Green button
     # Definição dos botões reset e Save
     x_res1, y_res1, round(y_button1)
@@ -160,22 +154,21 @@ def panel_creation():
         2,
     )  # Save text
 
-    return (panel)
-
-
-
-
+    return panel
 
 
 # This function identifies the laser and calculate the x and y coordinates
 def laser_coordinate(image, old_points):
     # create the mask for saturated color: a mask is the same size as our image, but has only two pixel values: 0 and 255
     black = np.zeros(image.shape, dtype="uint8")
-    old_points = old_points.astype(int)
-    old_2 = old_points[2].copy()
-    old_points[2] = old_points[3]
-    old_points[3] = old_2
-    projector = cv2.fillPoly(black, pts=[old_points], color=(255, 255, 255))
+    old_points_copy = old_points.copy()
+    old_points_copy = old_points_copy.astype(int)
+    old_2 = old_points_copy[2].copy()
+    old_points_copy[2] = old_points_copy[3]
+    old_points_copy[3] = old_2
+    projector = cv2.fillPoly(
+        black, pts=[old_points_copy], color=(255, 255, 255)
+    )
     # apply the mask to the image
     masked = cv2.bitwise_and(image, projector)
 
@@ -185,9 +178,10 @@ def laser_coordinate(image, old_points):
     lower = np.array([0, 0, 220])
     upper = np.array([255, 255, 255])
     mask = cv2.inRange(hsv, lower, upper)
-    #retangulo = cv2.rectangle(mask, old_points[0], old_points[2], (0, 80, 0), 2)
-    #cv2.namedWindow("mask", cv2.WINDOW_NORMAL)
-    #cv2.imshow("mask", retangulo)
+    cv2.imshow("mask", mask)
+    # retangulo = cv2.rectangle(mask, old_points[0], old_points[2], (0, 80, 0), 2)
+    # cv2.namedWindow("mask", cv2.WINDOW_NORMAL)
+    # cv2.imshow("mask", retangulo)
 
     # Calculate the centroid of the mask to have the position of just one pixel
     # Calculate moments of binary image
@@ -202,23 +196,17 @@ def laser_coordinate(image, old_points):
     return (X, Y)
 
 
-
-
-def warp_point(x, y, M) -> tuple[int, int]:
+def warp_point(x, y, M):
     d = M[2, 0] * x + M[2, 1] * y + M[2, 2]
 
     return (
-        int((M[0, 0] * x + M[0, 1] * y + M[0, 2]) / d), # x
-        int((M[1, 0] * x + M[1, 1] * y + M[1, 2]) / d), # y
+        int((M[0, 0] * x + M[0, 1] * y + M[0, 2]) / d),  # x
+        int((M[1, 0] * x + M[1, 1] * y + M[1, 2]) / d),  # y
     )
 
 
-
-
-
-
 # Define a function to handle the buttons
-def button_function(x, y, img):
+def button_function(x, y, img, color):
     global x_panel, y_panel, x_r1, y_r1, x_r2, y_r2, x_b1, y_b1, x_b2, y_b2, x_g2, y_g2, x_res1, y_res1, x_res2, y_res2, x_sav1, y_sav1, x_sav2, y_sav2
     if x_r1 <= x <= x_r2 and y_r1 <= y <= y_r2:
         color = (0, 0, 255)  # Red button selected
@@ -227,17 +215,14 @@ def button_function(x, y, img):
     elif x_g1 <= x <= x_g2 and y_g1 <= y <= y_g2:
         color = (0, 255, 0)  # Green button selected
     elif x_res1 <= x <= x_res2 and y_res1 <= y <= y_res2:
-        color = (1,1,1) #Reset
+        color = (1, 1, 1)  # Reset
     elif x_sav1 <= x <= x_sav2 and y_sav1 <= y <= y_sav2:
+        color = color
         saved_img = img.copy()  # save current image
         cv2.imwrite("saved_image.jpg", saved_img)  # Save image to directory
     else:
-        color = (0, 0, 255)
-    return (color)
-
-
-
-
+        color = color
+    return color
 
 
 # This function draws in the laser in the image
@@ -248,12 +233,10 @@ def button_function(x, y, img):
 # y_panel: panel size
 def draw_laser(image, x, y, color):
     global y_panel
-    if y > round(y_panel - 0.1 * y_panel):
+    if y < round(y_panel - 0.1 * y_panel):
         imagem = cv2.circle(image, (x, y), radius=2, color=color, thickness=-1)
-    elif color == (1,1,1):
+    elif color == (1, 1, 1):
         imagem = panel_creation()
     else:
         imagem = image
-    return (imagem)
-
-
+    return imagem
