@@ -131,7 +131,7 @@ class Calibrate:
 
         # image = cv.imread(self.CALIBRATE_WHITE_PATH)
         # comprimento, altura = image.shape[1], image.shape[0]
-        comprimento, altura = 1024, 768
+        comprimento, altura = 1280, 720
 
         new_points = np.float32(
             [[0, 0], [comprimento, 0], [0, altura], [comprimento, altura]]
@@ -149,6 +149,7 @@ class Calibrate:
             "calibration", cv.WND_PROP_FULLSCREEN, cv.WINDOW_FULLSCREEN
         )
         image = cv.imread(path)
+        cv.moveWindow("calibration", 1920, 0)
         cv.imshow("calibration", image)
         cv.waitKey(100)
 

@@ -59,16 +59,9 @@ y_panel = 720  # 360
 x_panel = 1280  # 640
 
 
-# Function for creation of the Panel
-def panel_creation():
+# função para chamar os valores do dicionário de forma simplificada
+def bxy(b_name, pos_idx):
     global x_panel, y_panel
-    panel = np.zeros((y_panel, x_panel, 3), np.uint8)  # creation of the panel
-
-    # Draw line to separate buttons from writing area
-    y_line = round(
-        y_panel - 0.1 * y_panel
-    )  # 10% do painel inferior é para o menu de ferramentas
-    cv2.line(panel, (0, y_line), (x_panel, y_line), (15, 15, 15), 2)
 
     # Coordenadas verticais dos botões
     y_button1 = round(
@@ -135,9 +128,84 @@ def panel_creation():
 
         button_x = round(button_x)
 
-    # função para chamar os valores do dicionário de forma simplificada
-    def bxy(b_name, pos_idx):
-        return button_positions_dict[b_name][pos_idx]
+    return button_positions_dict[b_name][pos_idx]
+
+
+# Function for creation of the Panel
+def panel_creation():
+    global x_panel, y_panel
+    panel = np.zeros((y_panel, x_panel, 3), np.uint8)  # creation of the panel
+
+    # Draw line to separate buttons from writing area
+    y_line = round(
+        y_panel - 0.1 * y_panel
+    )  # 10% do painel inferior é para o menu de ferramentas
+    cv2.line(panel, (0, y_line), (x_panel, y_line), (15, 15, 15), 2)
+
+    # Coordenadas verticais dos botões
+    y_button1 = round(
+        y_panel - (0.1 * y_panel * 0.2)
+    )  # 20% do menu de ferramentas espaço em branco abaixo dos botões
+    y_button2 = round(
+        y_panel - (0.1 * y_panel * 0.82)
+    )  # 62% é o tamanho do botão abaixo do espaçamento
+
+    # Definição dos tamanhos dos espaçamentos e dos botões
+    x_space_f = round(x_panel * 0.04)  # 4% do painel
+    x_space_c = round(x_panel * 0.02)  # 2% do painel
+    button_width_f = round(x_panel * 0.10)  # 10% do painel
+    button_width_c = round(x_panel * 0.145)  # 14.5% do painel
+
+    # Criação de dicionário com coordenadas x e y dos botões
+
+    # # definição dos parâmetros iniciais
+    # button_x = round(x_space_f)
+    # button_positions = [
+    #     "Reset",
+    #     "Red",
+    #     "Blue",
+    #     "Green",
+    #     "Erase",
+    #     "Save",
+    # ]  # 7 buttons slots
+    # button_xs = []  # x coordinates of each button
+    # button_positions_dict = {}  # dictionary to store button positions
+
+    # # loop para armazenamento dos valores no dicionário
+    # for i in range(len(button_positions)):
+    #     button_xs.append(button_x)
+
+    #     if i == 0:  # tamanho do primeiro botão
+    #         button_positions_dict[button_positions[i]] = (
+    #             (button_x, y_button1),
+    #             (button_x + button_width_f, y_button2),
+    #         )
+    #         button_x += button_width_f + x_space_f
+
+    #     elif i == (len(button_positions) - 1):  # tamanho do último botão
+    #         button_positions_dict[button_positions[i]] = (
+    #             (button_x, y_button1),
+    #             (button_x + button_width_f, y_button2),
+    #         )
+    #         button_x += button_width_f + x_space_f
+
+    #     elif i == (len(button_positions) - 2):  # ultimo botão de cor
+    #         button_positions_dict[button_positions[i]] = (
+    #             (button_x, y_button1),
+    #             (button_x + button_width_c, y_button2),
+    #         )
+    #         button_x += button_width_c + x_space_f
+
+    #     else:  # tamanho dos botões intermediários (cores)
+    #         button_positions_dict[button_positions[i]] = (
+    #             (button_x, y_button1),
+    #             (button_x + button_width_c, y_button2),
+    #         )
+    #         button_x += (
+    #             button_width_c + x_space_c
+    #         )  # cada botão será separado por um espaço (button_width)
+
+    #     button_x = round(button_x)
 
     # exemplo: bxy('Green',0) = (g_x1,g_y1) // bxy('Green',1) = (g_x2,g_y2)
 
@@ -231,7 +299,7 @@ def laser_coordinate(image, old_points):
     # tranforms the image to HSV
     hsv = cv2.cvtColor(masked, cv2.COLOR_BGR2HSV)
 
-    lower = np.array([0, 0, 220])
+    lower = np.array([0, 0, 254])
     upper = np.array([255, 255, 255])
     mask = cv2.inRange(hsv, lower, upper)
     cv2.imshow("mask", mask)
@@ -262,44 +330,49 @@ def warp_point(x, y, M):
 
 
 # Define a function to handle the buttons
-def button_function(x, y, img):
+def button_function(x, y, img, color_input):
+    # print(f"x :{x}", f"y :{y}")
+
     if (
         bxy("Red", 0)[0] <= x <= bxy("Red", 1)[0]
-        and bxy("Red", 0)[1] <= y <= bxy("Red", 1)[1]
+        and bxy("Red", 1)[1] <= y <= bxy("Red", 0)[1]
     ):
-        color = (0, 0, 255)  # Red button selected
+        color = (0, 0, 100)  # Red button selected
         radius = 2
     elif (
         bxy("Blue", 0)[0] <= x <= bxy("Blue", 1)[0]
-        and bxy("Blue", 0)[1] <= y <= bxy("Blue", 1)[1]
+        and bxy("Blue", 1)[1] <= y <= bxy("Blue", 0)[1]
     ):
-        color = (255, 0, 0)  # Blue button selected
+        color = (70, 0, 0)  # Blue button selected
         radius = 2
     elif (
         bxy("Green", 0)[0] <= x <= bxy("Green", 1)[0]
-        and bxy("Green", 0)[1] <= y <= bxy("Green", 1)[1]
+        and bxy("Green", 1)[1] <= y <= bxy("Green", 0)[1]
     ):
-        color = (0, 255, 0)  # Green button selected
+        color = (0, 70, 0)  # Green button selected
         radius = 2
     elif (
         bxy("Erase", 0)[0] <= x <= bxy("Erase", 1)[0]
-        and bxy("Erase", 0)[1] <= y <= bxy("Erase", 1)[1]
+        and bxy("Erase", 1)[1] <= y <= bxy("Erase", 0)[1]
     ):
         color = (0, 0, 0)  # Erase button selected
         radius = 5
     elif (
         bxy("Reset", 0)[0] <= x <= bxy("Reset", 1)[0]
-        and bxy("Reset", 0)[1] <= y <= bxy("Reset", 1)[1]
+        and bxy("Reset", 1)[1] <= y <= bxy("Reset", 0)[1]
     ):
         color = (1, 1, 1)  # Reset color
     elif (
         bxy("Save", 0)[0] <= x <= bxy("Save", 1)[0]
-        and bxy("Save", 0)[1] <= y <= bxy("Save", 1)[1]
+        and bxy("Save", 1)[1] <= y <= bxy("Save", 0)[1]
     ):
         saved_img = img.copy()  # save current image
         cv2.imwrite("saved_image.jpg", saved_img)  # Save image to directory
-    # else:
-    #    color = (0, 0, 255)
+        color = color_input
+    else:
+        color = color_input
+
+    # print(color)
     return color  # radius (?)
 
 
@@ -311,8 +384,15 @@ def button_function(x, y, img):
 # y_panel: panel size
 def draw_laser(image, x, y, color):
     global y_panel
-    if y < round(y_panel - 0.1 * y_panel):
-        imagem = cv2.circle(image, (x, y), radius=2, color=color, thickness=-1)
+    if color == (0, 0, 0):
+        if y < round(y_panel - 0.13 * y_panel):
+            imagem = cv2.circle(
+                image, (x, y), radius=30, color=color, thickness=-1
+            )
+        else:
+            imagem = image
+    elif y < round(y_panel - 0.1 * y_panel):
+        imagem = cv2.circle(image, (x, y), radius=5, color=color, thickness=-1)
     elif color == (1, 1, 1):
         imagem = panel_creation()
     else:
