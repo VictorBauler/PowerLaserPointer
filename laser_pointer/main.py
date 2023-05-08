@@ -51,6 +51,7 @@ cv.moveWindow("Draw", 1920, 0)
 
 # Para mostrar uma imagem ao vivo, adquira sequencialmente várias imagens
 # Para isso, inicie um loop sem fim até que a tecla Esc (codigo 27) seja pressionada
+s = 0
 k = 0
 aux = 0
 while 1:

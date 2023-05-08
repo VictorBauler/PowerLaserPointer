@@ -328,7 +328,7 @@ def warp_point(x, y, M):
         int((M[1, 0] * x + M[1, 1] * y + M[1, 2]) / d),  # y
     )
 
-s = 0
+
 # Define a function to handle the buttons
 def button_function(x, y, img, color_input):
     # print(f"x :{x}", f"y :{y}")
