@@ -2,7 +2,7 @@
 import numpy as np
 import cv2
 from calibrate import Calibrate
-
+import time
 
 def visualize_camera():
     cam = cv2.VideoCapture(1, cv2.CAP_DSHOW)
@@ -328,7 +328,7 @@ def warp_point(x, y, M):
         int((M[1, 0] * x + M[1, 1] * y + M[1, 2]) / d),  # y
     )
 
-
+s = 0
 # Define a function to handle the buttons
 def button_function(x, y, img, color_input):
     # print(f"x :{x}", f"y :{y}")
@@ -361,14 +361,28 @@ def button_function(x, y, img, color_input):
         bxy("Reset", 0)[0] <= x <= bxy("Reset", 1)[0]
         and bxy("Reset", 1)[1] <= y <= bxy("Reset", 0)[1]
     ):
-        color = (1, 1, 1)  # Reset color
+        time.sleep(1)
+        if (bxy("Reset", 0)[0] <= x <= bxy("Reset", 1)[0]
+        and bxy("Reset", 1)[1] <= y <= bxy("Reset", 0)[1]):
+            color = (1, 1, 1)  # Reset color
+        else:
+            color = color_input
     elif (
         bxy("Save", 0)[0] <= x <= bxy("Save", 1)[0]
         and bxy("Save", 1)[1] <= y <= bxy("Save", 0)[1]
     ):
-        saved_img = img.copy()  # save current image
-        cv2.imwrite("saved_image.jpg", saved_img)  # Save image to directory
-        color = color_input
+        time.sleep(1)
+        if (
+        bxy("Save", 0)[0] <= x <= bxy("Save", 1)[0]
+        and bxy("Save", 1)[1] <= y <= bxy("Save", 0)[1]):
+            s+=1
+            saved_img = img.copy()  # save current image
+            cv2.imwrite("saved_image"+str(s)+".jpg", saved_img)  # Save image to directory
+            print("saved image: "+str(s))
+            color = color_input
+            time.sleep(2)
+        else:
+            color = color_input
     else:
         color = color_input
 
