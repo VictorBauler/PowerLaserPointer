@@ -258,7 +258,12 @@ def panel_creation():
         bxy("Save", 0)[1]
         + (bxy("Save", 1)[1] - bxy("Save", 0)[1] + sav_text_size[1]) // 2
     )
-
+# Define posição do texto 'erase'
+    era_text_size = cv2.getTextSize("Borracha", cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)[0]
+    era_text_x = bxy('Erase',0)[0] + (bxy('Erase',1)[0] - bxy('Erase',0)[0] - era_text_size[0]) // 2
+    era_text_y = bxy('Erase',0)[1] + (bxy('Erase',1)[1] - bxy('Erase',0)[1] + era_text_size[1]) // 2
+    
+    
     cv2.putText(
         panel,
         "Reset",
@@ -277,7 +282,7 @@ def panel_creation():
         (30, 30, 30),
         2,
     )  # Save text
-
+    cv2.putText(panel, "Borracha", (era_text_x, era_text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (95, 95, 95), 2) # Erase text
     return panel
 
 
