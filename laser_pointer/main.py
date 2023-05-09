@@ -62,6 +62,8 @@ while 1:
     if Sucesso == True:
         # Espere por 10 ms que o usuário pressione uma tecla
         k = cv.waitKey(1)
+         if k == 98: # se botão externo (superior) do laser pointer for pressionado, sleep 3 segundos pra começar a desenhar
+            time.sleep(3)
         X, Y = laser_coordinate(imgCorrigida, old_points)
         x, y = warp_point(X, Y, M)
         if aux == 0:
