@@ -58,10 +58,10 @@ class Calibrate:
 
         try:
             cnt = contours[0]
-            for cont in contours:
+            for enum, cont in enumerate(contours):
                 epsilon = 0.01 * cv.arcLength(cont, True)
                 approx = cv.approxPolyDP(cont, epsilon, True)
-                if len(approx) == 4:
+                if (len(approx) == 4) and (cv.contourArea(cont) > 10000):
                     mask_draw = cv.cvtColor(thresh, cv.COLOR_GRAY2BGR)
                     contours = cv.drawContours(
                         mask_draw, [approx], -1, (0, 0, 255), 3

@@ -53,6 +53,7 @@ cv.moveWindow("Draw", 1920, 0)
 # Para isso, inicie um loop sem fim até que a tecla Esc (codigo 27) seja pressionada
 k = 0
 aux = 0
+s = 0
 while 1:
     # Adquira uma imagem
     Sucesso, img = cam.read()
@@ -62,13 +63,17 @@ while 1:
     if Sucesso == True:
         # Espere por 10 ms que o usuário pressione uma tecla
         k = cv.waitKey(1)
+        if (
+            k == 98
+        ):  # se botão externo (superior) do laser pointer for pressionado, sleep 3 segundos pra começar a desenhar
+            time.sleep(1)
         X, Y = laser_coordinate(imgCorrigida, old_points)
         x, y = warp_point(X, Y, M)
         if aux == 0:
-            color = button_function(x, y, panel, default_color)
+            color, s = button_function(x, y, panel, default_color, s)
             draw = draw_laser(panel, x, y, color)
         else:
-            color = button_function(x, y, draw, color)
+            color, s = button_function(x, y, draw, color, s)
             draw = draw_laser(draw, x, y, color)
         # cv.resize(draw, (1024, 768))
         cv.imshow("Draw", draw)

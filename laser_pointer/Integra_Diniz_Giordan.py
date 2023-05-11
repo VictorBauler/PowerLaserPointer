@@ -2,6 +2,7 @@
 import numpy as np
 import cv2
 from calibrate import Calibrate
+import time
 
 
 def visualize_camera():
@@ -259,6 +260,19 @@ def panel_creation():
         + (bxy("Save", 1)[1] - bxy("Save", 0)[1] + sav_text_size[1]) // 2
     )
 
+    # Define posição do texto 'erase'
+    era_text_size = cv2.getTextSize(
+        "Borracha", cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2
+    )[0]
+    era_text_x = (
+        bxy("Erase", 0)[0]
+        + (bxy("Erase", 1)[0] - bxy("Erase", 0)[0] - era_text_size[0]) // 2
+    )
+    era_text_y = (
+        bxy("Erase", 0)[1]
+        + (bxy("Erase", 1)[1] - bxy("Erase", 0)[1] + era_text_size[1]) // 2
+    )
+
     cv2.putText(
         panel,
         "Reset",
@@ -277,6 +291,16 @@ def panel_creation():
         (30, 30, 30),
         2,
     )  # Save text
+
+    cv2.putText(
+        panel,
+        "Borracha",
+        (era_text_x, era_text_y),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.7,
+        (95, 95, 95),
+        2,
+    )  # Erase text
 
     return panel
 
@@ -330,7 +354,7 @@ def warp_point(x, y, M):
 
 
 # Define a function to handle the buttons
-def button_function(x, y, img, color_input):
+def button_function(x, y, img, color_input, s):
     # print(f"x :{x}", f"y :{y}")
 
     if (
@@ -366,14 +390,19 @@ def button_function(x, y, img, color_input):
         bxy("Save", 0)[0] <= x <= bxy("Save", 1)[0]
         and bxy("Save", 1)[1] <= y <= bxy("Save", 0)[1]
     ):
+        s += 1
         saved_img = img.copy()  # save current image
-        cv2.imwrite("saved_image.jpg", saved_img)  # Save image to directory
+        cv2.imwrite(
+            "saved_image" + str(s) + ".jpg", saved_img
+        )  # Save image to directory
+        # print("saved image: " + str(s))
         color = color_input
+        time.sleep(2)
     else:
         color = color_input
 
     # print(color)
-    return color  # radius (?)
+    return color, s  # radius (?)
 
 
 # This function draws in the laser in the image
