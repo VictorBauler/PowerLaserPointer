@@ -25,15 +25,25 @@ class Calibrate:
         Returns:
 
         """
+        gray_black = cv.cvtColor(blackImg, cv.COLOR_BGR2GRAY)
+        gray_white = cv.cvtColor(whiteImg, cv.COLOR_BGR2GRAY)
+        cv.imwrite("gray_black.png", gray_black)
+        cv.imwrite("gray_white.png", gray_white)
 
-        diff = cv.absdiff(blackImg, whiteImg)
-        cv.imwrite("diff.png", diff)
+        # diff = cv.absdiff(blackImg, whiteImg)
+        # cv.imwrite("diff.png", diff)
 
-        gray = cv.cvtColor(diff, cv.COLOR_BGR2GRAY)
-        cv.imwrite("gray.png", gray)
+        # gray = cv.cvtColor(diff, cv.COLOR_BGR2GRAY)
+        # cv.imwrite("gray.png", gray)
+
+        # diff_gray = cv.absdiff(gray_black, gray_white)
+        diff_gray = gray_white - gray_black
+        # cv.imwrite("diff_gray.png", diff_gray)
+        diff_gray = np.where(diff_gray < 0, 0, diff_gray)
+        cv.imwrite("diff_gray.png", diff_gray)
 
         threshold, thresh = cv.threshold(
-            gray, 50, 255, cv.THRESH_BINARY + cv.THRESH_OTSU
+            diff_gray, 200, 255, cv.THRESH_BINARY + cv.THRESH_OTSU
         )
         cv.imwrite("thresh.png", thresh)
 
@@ -51,10 +61,18 @@ class Calibrate:
             for cont in contours:
                 epsilon = 0.01 * cv.arcLength(cont, True)
                 approx = cv.approxPolyDP(cont, epsilon, True)
-                if (cv.contourArea(cont) > cv.contourArea(cnt)) and (
-                    len(approx) == 4
-                ):
-                    cnt = cont
+                if len(approx) == 4:
+                    mask_draw = cv.cvtColor(thresh, cv.COLOR_GRAY2BGR)
+                    contours = cv.drawContours(
+                        mask_draw, [approx], -1, (0, 0, 255), 3
+                    )
+                    cv.imshow("contours.png", contours)
+                    k = cv.waitKey(0)
+
+                    if k == 13:
+                        cnt = cont
+                    else:
+                        pass
 
             # Aproximar maior contorno por um polígono
             epsilon = 0.01 * cv.arcLength(cnt, True)
@@ -217,9 +235,3 @@ if __name__ == "__main__":
     calibrate = Calibrate(1, matCam, distorCam)
 
     M = calibrate.run()
-
-    (
-        "sahuashudasuhshudashdaduasduasdhuadw",
-        "sauhsausahsusahusauhdasuhdashdasuhasasdas",
-        "sahusahusahuashusauashusahsauh",
-    )
